@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Development overrides for backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      JPA_DDL_AUTO: update
+      JPA_SHOW_SQL: true
+      LOG_LEVEL: DEBUG
+      SECURITY_LOG_LEVEL: DEBUG
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/build:/app/build
+    command: ["./gradlew", "bootRun", "--continuous"]
+
+  # Development database with exposed ports and dev settings
+  postgres:
+    environment:
+      POSTGRES_DB: planora_dev
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+
+  # Development Redis with different port
+  redis:
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+
+  # PgAdmin for database management (development only)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: planora-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@planora.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - planora-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Redis Commander for Redis management (development only)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: planora-redis-commander
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - planora-network
+
+volumes:
+  pgadmin_data:
+    driver: local
