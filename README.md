@@ -4,18 +4,44 @@ Planora is a comprehensive travel planning platform that combines AI-powered rec
 
 ## Architecture
 
-- **Backend**: Java 21 + Spring Boot 3.x
-- **Frontend**: React 18 + TypeScript
+- **Backend**: Node.js 18+ + NestJS (TypeScript)
+- **Frontend**: React 18 + TypeScript *(not yet implemented)*
 - **Database**: PostgreSQL 15
 - **Cache**: Redis 7
-- **File Storage**: AWS S3
+- **File Storage**: AWS S3 *(planned)*
 - **Containerization**: Docker & Docker Compose
+
+## Project Status
+
+### ✅ Completed
+- Project structure and module scaffolding
+- NestJS backend with 13 core modules:
+  - Authentication, Users, Trips, AI, Location
+  - Collaboration, Files, Notifications, Checklists
+  - Cache, Database, Storage, Integrations
+- Docker Compose setup for PostgreSQL and Redis
+- Development tooling (Makefile, scripts)
+
+### 🚧 In Progress / Next Steps
+- Database connection and ORM setup (TypeORM/Prisma)
+- Entity models with proper relationships
+- Service implementations (currently placeholder stubs)
+- Authentication and JWT security
+- Trip management core functionality
+
+### 📋 Planned
+- Frontend application
+- AI integration (OpenAI)
+- External API integrations (Google Maps, Weather, Currency)
+- Real-time collaboration features
+- File storage (AWS S3)
+- Comprehensive testing suite
 
 ## Prerequisites
 
 - Docker and Docker Compose
-- Java 21 (for local development)
-- Node.js 18+ (for frontend development)
+- Node.js 18+ (for backend and frontend development)
+- npm or yarn
 - Make (optional, for convenience commands)
 
 ## Quick Start
@@ -40,8 +66,8 @@ Planora is a comprehensive travel planning platform that combines AI-powered rec
    ```
 
 4. **Access the applications**
-   - Backend API: http://localhost:8080/api
-   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:3000 (default NestJS port)
+   - Frontend: http://localhost:3000 *(not yet implemented)*
    - PgAdmin: http://localhost:5050 (admin@planora.com / admin123)
    - Redis Commander: http://localhost:8081
 
@@ -73,9 +99,12 @@ docker-compose logs -f backend
 ### Backend Development
 ```bash
 cd backend
-./gradlew bootRun          # Run Spring Boot application
-./gradlew test             # Run tests
-./gradlew build            # Build application
+npm install                # Install dependencies
+npm run start:dev         # Run NestJS application in watch mode
+npm run start:prod        # Run in production mode
+npm run test              # Run unit tests
+npm run test:e2e          # Run end-to-end tests
+npm run build             # Build application
 ```
 
 ## Configuration
@@ -90,17 +119,46 @@ Key environment variables (see `.env.example` for complete list):
 - `DATABASE_URL`: PostgreSQL connection string
 - `REDIS_HOST`: Redis server host
 
-### Application Profiles
+### Environment Configuration
 
-- `dev`: Development profile with debug logging and auto-DDL
-- `test`: Test profile with H2 in-memory database
-- `prod`: Production profile with optimized settings
+Create a `.env` file in the backend directory:
+```env
+# Database
+DATABASE_URL=postgresql://planora:planora123@localhost:5432/planora
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=planora
+DATABASE_PASSWORD=planora123
+DATABASE_NAME=planora
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT
+JWT_SECRET=your-secret-key-here
+JWT_EXPIRATION=7d
+
+# External APIs
+OPENAI_API_KEY=your-openai-key
+GOOGLE_MAPS_API_KEY=your-google-maps-key
+WEATHER_API_KEY=your-weather-api-key
+CURRENCY_API_KEY=your-currency-api-key
+
+# AWS S3
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=planora-documents-dev
+```
 
 ## API Documentation
 
-Once the backend is running, API documentation is available at:
-- Swagger UI: http://localhost:8080/api/swagger-ui.html
-- OpenAPI JSON: http://localhost:8080/api/v3/api-docs
+Once the backend is running, API documentation will be available via Swagger:
+- Swagger UI: http://localhost:3000/api *(to be configured)*
+- OpenAPI JSON: http://localhost:3000/api-json *(to be configured)*
+
+*Note: Swagger/OpenAPI integration needs to be set up in the NestJS application.*
 
 ## Database Management
 
@@ -121,8 +179,10 @@ make db-migrate    # Run database migrations
 ### Backend Tests
 ```bash
 cd backend
-./gradlew test                    # Run all tests
-./gradlew test --tests UserTest   # Run specific test class
+npm test                          # Run all unit tests
+npm run test:watch                # Run tests in watch mode
+npm run test:cov                  # Run tests with coverage
+npm run test:e2e                  # Run end-to-end tests
 ```
 
 ### Frontend Tests
@@ -134,18 +194,24 @@ npm run test:coverage             # Run tests with coverage
 
 ## Monitoring and Health Checks
 
-- **Health Check**: http://localhost:8080/api/actuator/health
-- **Metrics**: http://localhost:8080/api/actuator/metrics
-- **Application Info**: http://localhost:8080/api/actuator/info
+Health check endpoints will be available once implemented:
+- **Health Check**: http://localhost:3000/health *(to be implemented)*
+- **Metrics**: http://localhost:3000/metrics *(to be implemented)*
+
+*Note: NestJS health check module needs to be configured.*
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Port conflicts**: Ensure ports 3000, 5432, 6379, and 8080 are available
+1. **Port conflicts**: Ensure ports 3000 (backend), 5432 (PostgreSQL), 6379 (Redis), 5050 (PgAdmin), and 8081 (Redis Commander) are available
 2. **Docker build failures**: Run `make clean` to clean up Docker resources
-3. **Database connection issues**: Check if PostgreSQL container is healthy
-4. **API key errors**: Verify all required API keys are set in `.env`
+3. **Database connection issues**: 
+   - Check if PostgreSQL container is healthy: `docker ps`
+   - Verify database credentials in `.env` file
+   - Ensure database connection is configured in NestJS app
+4. **Module dependencies**: Run `npm install` in the backend directory if you encounter module errors
+5. **API key errors**: Verify all required API keys are set in `.env` file
 
 ### Logs
 ```bash
@@ -168,6 +234,33 @@ make up                     # Start fresh environment
 3. Run tests: `make test`
 4. Submit a pull request
 
-## License
+## Backend Module Structure
 
-[License information here]# planora
+The backend is organized into the following modules (currently scaffolded, implementation pending):
+
+- **auth**: Authentication and authorization
+- **users**: User management
+- **trips**: Trip planning and management
+- **ai**: AI-powered recommendations
+- **location**: Location services and maps integration
+- **collaboration**: Real-time collaboration features
+- **files**: File upload and management
+- **notifications**: Notification system
+- **checklists**: Trip checklists and packing lists
+- **cache**: Caching layer
+- **database**: Database utilities
+- **storage**: Storage abstraction layer
+- **integrations**: External service integrations
+
+## Development Notes
+
+- The backend uses NestJS framework with TypeScript
+- All modules have been scaffolded but contain placeholder implementations
+- Database connection (TypeORM/Prisma) needs to be configured
+- Entity models need to be defined with proper relationships
+- Services need business logic implementation
+- Authentication middleware needs to be set up
+
+<!-- ## License
+
+[License information here] -->
